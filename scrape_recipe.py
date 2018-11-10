@@ -1,10 +1,13 @@
 import argparse
+import pprint
 from requests import get
 from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
 
 HEADINGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+LIST_TAGS = ['ul', 'ol']
+LIST_ITEM = 'li'
 
 def get_webpage(url):
     try:
@@ -31,25 +34,62 @@ def get_print_urls(html):
                 possible_urls.append(a.get('href'))
     return possible_urls
 
+def get_list_with_sub(section):
+    """given 'section', returns a list (unordered or ordered)"""
+    return get_section_with_sub(section, LIST_TAGS, LIST_ITEM)
+
+def get_section_header_with_list(html, keywords):
+    """gets an HTML header from 'html' who's content contains at least one of 'keywords' """
+    """and optionally has sub-elements in the 'validifiers' list"""
+    return get_section_header(html, keywords, LIST_TAGS)
+
 def get_section_header(html, keywords, validifiers):
+    """gets an HTML header from 'html' who's content contains at least one of 'keywords'"""
+    """and optionally has sub-elements in the 'validifiers' list"""
     return get_section(HEADINGS, html, keywords, validifiers)
+
+def get_section_with_sub(section, tags, sub_tag):
+    """given 'section', returns a list of strings of type 'sub_tag' that live beneath one of 'tags'"""
+    if section:
+        _list=[]
+        i=1
+        for tag in tags:
+            for t in section.find_all(tag):
+                if not sub_tag:
+                    _list.append(t.string)
+                    return _list
+                for elt in t.find_all(sub_tag):
+                    if elt.stripped_strings:
+                        _list.append(''.join(elt.stripped_strings))
+                        i += 1
+                return _list
 
 def get_section(types, html, keywords, validifiers):
     """Gets an HTML tag from 'html' who's content contains at least one of 'keywords'
     and optionally has sub-elements in the 'validifiers' list
     """
+    if not keywords:
+        return None
     for _type in types:
         for tag in html.find_all(_type):
             for string in tag.stripped_strings:
                 if any(x in string.lower() for x in keywords):
-                    if (validifiers == None or contains(tag.parent, validifiers)):
+                    if (not validifiers or contains(tag.parent, validifiers)):
                         return tag
 
+def contains(html, tags):
+    """returns true if 'html' is a parent to any of 'tags'"""
+    for tag in tags:
+        for _ in html.find_all(tag):
+            return True
+    return False
+
 def get_name(url, html):
+    """gets the name of the recipe"""
     name_segments = get_name_segments(url)
-    if (name_segments == None):
+    if not name_segments:
         return None
-    return get_section_header(html, get_name_segments(url), None)
+    return get_section_header(html, name_segments, None)
 
 def get_name_segments(url):
     """gets all keywords of the recipe title"""
@@ -60,35 +100,16 @@ def get_name_segments(url):
             return sub_segments
 
 def get_ingredients(html):
+    section = get_section_header_with_list(html, ['ingredients', 'materials'])
+    if section:            
+        return get_list_with_sub(section.parent)
     return None
 
 def get_instructions(html):
-    tags = ['ul', 'ol']
-    section = get_section_header(html, ['ingredients', 'steps'], tags)
-    if section:            
-        return get_list_with_sub(section.parent, tags, 'li')
-
-def contains(html, tags):
-    for tag in tags:
-        for _ in html.find_all(tag):
-            return True
-    return False
-
-def get_list_with_sub(section, tags, sub_tag):
-    """given 'section', returns a list of strings of type 'sub_tag' that live beneath one of 'tags'"""
+    section = get_section_header_with_list(html, ['directions', 'instructions', 'steps'])
     if section:
-        _list=[]
-        i=1
-        for tag in tags:
-            for t in section.find_all(tag):
-                if (sub_tag == None):
-                    _list.append(t.string)
-                    return _list
-                for elt in t.find_all(sub_tag):
-                    if elt.string:
-                        _list.append("step " + str(i) + " : " + elt.string)
-                        i += 1
-                return _list
+        return get_list_with_sub(section.parent)
+
 
 def parse_recipe(url):
     raw_html = get_webpage(url)
@@ -99,17 +120,22 @@ def parse_recipe(url):
             raw_html_print = get_webpage(urls[0])
             html = BeautifulSoup(raw_html_print, 'html.parser')
         name = get_name(url, html)
-        if (name == None):
-            return None
-        print("Recipe Name: " + name.string)
         instructions = get_instructions(html)
-        print("Instructions")
-        if instructions:
-            for x in instructions:
-                print('\t' + x)
+        ingredients = get_ingredients(html)
+        if not name or not instructions or not ingredients:
+            return None
+        return {'name': name.string, 'instructions': instructions, 'ingredients': ingredients}
+
+
+def pprinty(recipe):
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(recipe)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape some recipes')
     parser.add_argument('url', type=str)
     args = parser.parse_args()
-    parse_recipe(args.url)
+    recipe = parse_recipe(args.url)
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(recipe)

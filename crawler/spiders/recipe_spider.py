@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import scrape_recipe
 import urllib
 from bs4 import BeautifulSoup 
 from pymongo import MongoClient
+from scrape_recipe import pprinty, parse_recipe
 
 
 class RecipeSpiderSpider(scrapy.Spider):
@@ -24,6 +24,6 @@ class RecipeSpiderSpider(scrapy.Spider):
                 url = urllib.parse.urljoin(response.url, url)
                 if (url not in urls):
                     print("Parsing URL " + url)
-                    scrape_recipe.parse_recipe(url)
+                    pprinty(parse_recipe(recipe_url))
                     urls.append(url)
         
