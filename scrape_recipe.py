@@ -30,12 +30,14 @@ def get_print_urls(html):
     return possible_urls
 
 def get_section(html, keywords, validifiers):
-    for header in html.find_all('h2'):
-        for string in header.stripped_strings:
-            if any(x in string.lower() for x in keywords):
-                if (contains(header.parent, validifiers)):
-                    return header.parent
-    return None
+    try:
+        for header in html.find_all('h2'):
+            for string in header.stripped_strings:
+                if any(x in string.lower() for x in keywords):
+                    if (contains(header.parent, validifiers)):
+                        return header.parent
+    except e:
+        print("Error " + e)
 
 def get_name(html):
     return None
@@ -55,31 +57,35 @@ def contains(html, tags):
     return False
 
 def get_list_with_sub(section, tags, sub_tag):
-    _list=[]
-    i=1
-    for tag in tags:
-        for t in section.find_all(tag):
-            for elt in t.find_all(sub_tag):
-                _list.append("step " + str(i) + " : " + elt.string)
-                i += 1
-            return _list
+    if section:
+        _list=[]
+        i=1
+        for tag in tags:
+            for t in section.find_all(tag):
+                for elt in t.find_all(sub_tag):
+                    if elt.string:
+                        _list.append("step " + str(i) + " : " + elt.string)
+                        i += 1
+                return _list
 
 def parse_recipe(url):
     raw_html = get_webpage(url)
-    html = BeautifulSoup(raw_html, 'html.parser')
-    urls = get_print_urls(html)
-    if (len(urls) > 0):
-        raw_html_print = get_webpage(urls[0])
-        html = BeautifulSoup(raw_html_print, 'html.parser')
-    instructions = get_instructions(html)
-    for x in instructions:
-        print(x)
+    if raw_html:
+        html = BeautifulSoup(raw_html, 'html.parser')
+        urls = get_print_urls(html)
+        if (len(urls) > 0):
+            raw_html_print = get_webpage(urls[0])
+            html = BeautifulSoup(raw_html_print, 'html.parser')
+        instructions = get_instructions(html)
+        if instructions:
+            for x in instructions:
+                print(x)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape some recipes')
     parser.add_argument('url', type=str)
     args = parser.parse_args()
 
-    print("Downloading webpage at '" + url)
-    parse_recipe(url)
+    print("Downloading webpage at '" + args.url)
+    parse_recipe(args.url)
 
