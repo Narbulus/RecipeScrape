@@ -13,21 +13,22 @@ DEFAULT_RECIPE_URL = 'https://www.tasteofhome.com/recipes/'
 class RecipeSpiderSpider(scrapy.Spider):
     name = 'spidey_script'
 
-    def __init__(self, db_name="spidey_data", debug=False, *args, **kwargs):
+    def __init__(self, db_name="spidey_data", debug=False, splash=False, *args, **kwargs):
         super(RecipeSpiderSpider, self).__init__(*args, **kwargs)
         self.client = MongoClient()
         self.db = self.client[db_name]
         self.mongo = self.db["recipes"]
-        if debug is False:
-            self.debug = False
-        else:
-            self.debug = True
+        self.debug = debug
+        self.splash = splash
 
     def start_requests(self):
         url = DEFAULT_RECIPE_URL
         if hasattr(self, 'url'):
             url = self.url
-        yield SplashRequest(url, self.parse_result, args={'wait': 0.5}, endpoint='render.html')
+        if (self.splash):
+            yield SplashRequest(url, self.parse_result, args={'wait': 0.5}, endpoint='render.html')
+        else:
+            yield scrapy.Request(url=url, callback=self.parse_result)
 
     def parse_result(self, response):
         urls = []
@@ -61,3 +62,4 @@ class RecipeSpiderSpider(scrapy.Spider):
             recipe = parse_recipe(url, self.debug)
             if (recipe):
                 return recipe
+

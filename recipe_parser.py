@@ -138,24 +138,22 @@ def get_image_score(img, name_segments):
             _local_score += 1
     return _local_score
 
-def parse_recipe(url):
+def parse_recipe(url, debug):
     raw_html = get_webpage(url)
     if raw_html:
         html = BeautifulSoup(raw_html, 'html.parser')
-        urls = get_print_urls(html)
-        if (len(urls) > 0):
-            raw_html_print = get_webpage(urls[0])
-            try:
-                html = BeautifulSoup(raw_html_print, 'html.parser')
-            except:
-                pass
         name = get_name(url, html)
         instructions = get_instructions(html)
         ingredients = get_ingredients(html)
         image_url = get_image_url(url, html)
         if not name or not instructions or not ingredients:
             return None
-        return {'name': name.string, 'instructions': instructions, 'ingredients': ingredients, 'image_url': image_url}
+        return  {
+            'name': name.string, 
+            'instructions': instructions, 
+            'ingredients': ingredients, 
+            'image_url': image_url
+        }
 
 def pprinty(recipe):
     pp = pprint.PrettyPrinter(indent=4)
