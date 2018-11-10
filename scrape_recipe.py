@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 HEADINGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 LIST_TAGS = ['ul', 'ol']
 LIST_ITEM = 'li'
+IMG = 'img'
 
 def get_webpage(url):
     try:
@@ -101,7 +102,7 @@ def get_name_segments(url):
 
 def get_ingredients(html):
     section = get_section_header_with_list(html, ['ingredients', 'materials'])
-    if section:            
+    if section:
         return get_list_with_sub(section.parent)
     return None
 
@@ -110,6 +111,32 @@ def get_instructions(html):
     if section:
         return get_list_with_sub(section.parent)
 
+def get_image_url(url, html):
+    name_segments = get_name_segments(url)
+    if not name_segments:
+        return None
+
+    _best_score = 0
+    _best_img = None
+    for img in html.find_all('img'):
+        _local_score = get_image_score(img, name_segments)
+        if _local_score > _best_score:
+            _best_img = img.get('src')
+    return _best_img
+
+def get_image_score(img, name_segments):
+    _local_score = 0
+    description = img.get('title')
+    if description is None:
+        description = img.get('alt')
+    if description is None:
+        return _local_score
+
+    description = description.lower()
+    for word in name_segments:
+        if word in description:
+            _local_score += 1
+    return _local_score
 
 def parse_recipe(url):
     raw_html = get_webpage(url)
@@ -118,13 +145,17 @@ def parse_recipe(url):
         urls = get_print_urls(html)
         if (len(urls) > 0):
             raw_html_print = get_webpage(urls[0])
-            html = BeautifulSoup(raw_html_print, 'html.parser')
+            try:
+                html = BeautifulSoup(raw_html_print, 'html.parser')
+            except:
+                pass
         name = get_name(url, html)
         instructions = get_instructions(html)
         ingredients = get_ingredients(html)
+        image_url = get_image_url(url, html)
         if not name or not instructions or not ingredients:
             return None
-        return {'name': name.string, 'instructions': instructions, 'ingredients': ingredients}
+        return {'name': name.string, 'instructions': instructions, 'ingredients': ingredients, 'image_url': image_url}
 
 def pprinty(recipe):
     pp = pprint.PrettyPrinter(indent=4)
