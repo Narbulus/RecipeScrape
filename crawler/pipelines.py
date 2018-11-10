@@ -4,7 +4,7 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-from recipe_parser import pprinty
+from scrape_recipe import pprinty
 
 class PrintRecipePipeline(object):
     def process_item(self, item, spider):
@@ -13,8 +13,11 @@ class PrintRecipePipeline(object):
         return item
 
 class MongoPipeline(object):
+    def close_spider(self, spider):
+        spider.client.close()
+
     def process_item(self, item, spider):
-        # write to DB
-        if spider.debug: 
-            print("from Mongo")
+        if spider.debug:
+            print("Writing to MongoDB")
+        spider.mongo.insert_one(dict(item))
         return item
