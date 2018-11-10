@@ -3,7 +3,7 @@ import scrapy
 import urllib
 from pymongo import MongoClient
 from bs4 import BeautifulSoup 
-from recipe_parser import parse_recipe
+from scrape_recipe import parse_recipe
 
 DEFAULT_RECIPE_URL = 'https://www.tasteofhome.com/recipes/'
 
