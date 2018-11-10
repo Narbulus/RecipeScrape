@@ -4,7 +4,7 @@ from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
 
-headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+HEADINGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 
 def get_webpage(url):
     try:
@@ -31,18 +31,13 @@ def get_print_urls(html):
                 possible_urls.append(a.get('href'))
     return possible_urls
 
-###
-# gets an HTML header from 'html' who's content contains at least one of 'keywords'
-# and optionally has sub-elements in the 'validifiers' list
-###
 def get_section_header(html, keywords, validifiers):
-    return get_section(headings, html, keywords, validifiers)
+    return get_section(HEADINGS, html, keywords, validifiers)
 
-###
-# gets an HTML tag from 'html' who's content contains at least one of 'keywords'
-# and optionally has sub-elements in the 'validifiers' list
-###
 def get_section(types, html, keywords, validifiers):
+    """Gets an HTML tag from 'html' who's content contains at least one of 'keywords'
+    and optionally has sub-elements in the 'validifiers' list
+    """
     for _type in types:
         for tag in html.find_all(_type):
             for string in tag.stripped_strings:
@@ -50,41 +45,37 @@ def get_section(types, html, keywords, validifiers):
                     if (validifiers == None or contains(tag.parent, validifiers)):
                         return tag
 
-### gets the name of the recipe
 def get_name(url, html):
     name_segments = get_name_segments(url)
     if (name_segments == None):
         return None
     return get_section_header(html, get_name_segments(url), None)
 
-### gets all keywords of the recipe title
 def get_name_segments(url):
+    """gets all keywords of the recipe title"""
     segmented_url = url.split('/')
     for segment in segmented_url:
         sub_segments = segment.split('-')
         if (len(sub_segments) > 1):
             return sub_segments
 
-### gets the list of ingredients 
 def get_ingredients(html):
     return None
 
-### gets the set of instructions to follow
 def get_instructions(html):
     tags = ['ul', 'ol']
     section = get_section_header(html, ['ingredients', 'steps'], tags)
     if section:            
         return get_list_with_sub(section.parent, tags, 'li')
 
-### returns true if 'html' is a parent to any of 'tags'
 def contains(html, tags):
     for tag in tags:
         for _ in html.find_all(tag):
             return True
     return False
 
-### given 'section', returns a list of strings of type 'sub_tag' that live beneath one of 'tags'
 def get_list_with_sub(section, tags, sub_tag):
+    """given 'section', returns a list of strings of type 'sub_tag' that live beneath one of 'tags'"""
     if section:
         _list=[]
         i=1
