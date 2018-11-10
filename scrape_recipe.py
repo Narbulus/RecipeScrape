@@ -73,7 +73,8 @@ def get_ingredients(html):
 def get_instructions(html):
     tags = ['ul', 'ol']
     section = get_section_header(html, ['ingredients', 'steps'], tags)
-    return get_list_with_sub(section.parent, tags, 'li')
+    if section:            
+        return get_list_with_sub(section.parent, tags, 'li')
 
 ### returns true if 'html' is a parent to any of 'tags'
 def contains(html, tags):
@@ -111,8 +112,9 @@ def parse_recipe(url):
         print("Recipe Name: " + name.string)
         instructions = get_instructions(html)
         print("Instructions")
-        for x in instructions:
-            print('\t' + x)
+        if instructions:
+            for x in instructions:
+                print('\t' + x)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape some recipes')
