@@ -94,8 +94,9 @@ def get_list_with_sub(section, tags, sub_tag):
                     _list.append(t.string)
                     return _list
                 for elt in t.find_all(sub_tag):
-                    _list.append("step " + str(i) + " : " + elt.string)
-                    i += 1
+                    if elt.string:
+                        _list.append("step " + str(i) + " : " + elt.string)
+                        i += 1
                 return _list
 
 def parse_recipe(url):
