@@ -51,20 +51,18 @@ def get_ingredients(html):
 
 def get_instructions(html):
     section = get_section(html, ['ingredients', 'steps'])
+    instructions=[]
     i = 1
     for ul in section.find_all('ul'):
         for li in ul.find_all('li'):
-            print("step " + str(i) + " : " + li.string)
+            instructions.append("step " + str(i) + " : " + li.string)
             i += 1
+    return instructions
 
 def get_name(html):
     return None
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Scrape some recipes')
-    parser.add_argument('url', type=str)
-    args = parser.parse_args()
-    
+def program(html):
     print("Downloading webpage at '" + args.url)
     raw_html = get_webpage(args.url)
     print("Extracting HTML from: " + args.url)
@@ -76,5 +74,15 @@ if __name__ == "__main__":
     
     raw_html_print = get_webpage(urls[0])
     html_print = BeautifulSoup(raw_html_print, 'html.parser')
-    get_instructions(html_print)
+    instructions = get_instructions(html_print)
+    for x in instructions:
+        print(x)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Scrape some recipes')
+    parser.add_argument('url', type=str)
+    args = parser.parse_args()
+    
+    program(args.url)
+
 
