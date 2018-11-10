@@ -59,19 +59,12 @@ def get_instructions(html):
 def get_name(html):
     return None
 
-def main(html):
-    print("Downloading webpage at '" + args.url)
-    raw_html = get_webpage(args.url)
-    print("Extracting HTML from: " + args.url)
+def parse_recipe(raw_html):
     html = BeautifulSoup(raw_html, 'html.parser')
-    print("Searching for printable version")
     urls = get_print_urls(html)
     if (len(urls) > 0):
-        print("Printable version found, extracting HTML")
         raw_html_print = get_webpage(urls[0])
         html = BeautifulSoup(raw_html_print, 'html.parser')
-    else:
-        print("No printable version found, using webpage")
     instructions = get_instructions(html)
     for x in instructions:
         print(x)
@@ -80,5 +73,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape some recipes')
     parser.add_argument('url', type=str)
     args = parser.parse_args()
-    
-    main(args.url)
+
+    print("Downloading webpage at '" + url)
+    parse_recipe(get_webpage(url))
