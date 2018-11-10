@@ -32,6 +32,27 @@ def get_print_urls(html):
                 possible_urls.append(a.get('href'))
     return possible_urls
 
+def get_section(html, keywords):
+    for header in html.find_all('h2'):
+        for string in header.stripped_strings:
+            if any(x in string.lower() for x in keywords):
+                return header.parent
+    return None
+
+def get_ingredients(html):
+    return None
+
+def get_instructions(html):
+    section = get_section(html, ['ingredients', 'steps'])
+    i = 1
+    for ul in section.find_all('ul'):
+        for li in ul.find_all('li'):
+            print("step " + str(i) + " : " + li.string)
+            i += 1
+
+def get_name(html):
+    return None
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape some recipes')
     parser.add_argument('url', type=str)
@@ -39,13 +60,14 @@ if __name__ == "__main__":
     
     print("Downloading webpage at '" + args.url)
     raw_html = get_webpage(args.url)
-    print("Extracting HTML")
+    print("Extracting HTML from: " + args.url)
     html = BeautifulSoup(raw_html, 'html.parser')
     print("Searching for printable version")
     urls = get_print_urls(html)
     if (len(urls) > 0):
         print("Printable version found, extracting HTML")
     
-        for url in get_print_urls(html):
-            print(get_webpage(url))
+    raw_html_print = get_webpage(urls[0])
+    html_print = BeautifulSoup(raw_html_print, 'html.parser')
+    print(get_instructions(html_print))
 
