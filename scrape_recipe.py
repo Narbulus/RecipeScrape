@@ -41,7 +41,11 @@ if __name__ == "__main__":
     raw_html = get_webpage(args.url)
     print("Extracting HTML")
     html = BeautifulSoup(raw_html, 'html.parser')
+    print("Searching for printable version")
+    urls = get_print_urls(html)
+    if (len(urls) > 0):
+        print("Printable version found, extracting HTML")
     
-    for url in get_print_urls(html):
-        print(get_webpage(url))
+        for url in get_print_urls(html):
+            print(get_webpage(url))
 
