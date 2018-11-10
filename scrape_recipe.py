@@ -126,11 +126,9 @@ def parse_recipe(url):
             return None
         return {'name': name.string, 'instructions': instructions, 'ingredients': ingredients}
 
-
 def pprinty(recipe):
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(recipe)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape some recipes')
