@@ -43,15 +43,12 @@ def get_section_header(html, keywords, validifiers):
 # and optionally has sub-elements in the 'validifiers' list
 ###
 def get_section(types, html, keywords, validifiers):
-    try:
-        for _type in types:
-            for tag in html.find_all(_type):
-                for string in tag.stripped_strings:
-                    if any(x in string.lower() for x in keywords):
-                        if (validifiers == None or contains(tag.parent, validifiers)):
-                            return tag
-    except e:
-        print("Error " + e)
+    for _type in types:
+        for tag in html.find_all(_type):
+            for string in tag.stripped_strings:
+                if any(x in string.lower() for x in keywords):
+                    if (validifiers == None or contains(tag.parent, validifiers)):
+                        return tag
 
 ### gets the name of the recipe
 def get_name(url, html):

@@ -8,6 +8,9 @@ from pymongo import MongoClient
 class RecipeSpiderSpider(scrapy.Spider):
     name = 'recipe_spider'
     start_urls = ['https://www.tasteofhome.com/recipes/']
+    client = MongoClient()
+    db = client.recipe_db_test
+    recipe_collection = db.recipes
 
     def parse(self, response):
         print(response.url)
