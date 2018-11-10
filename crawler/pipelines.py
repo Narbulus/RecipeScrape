@@ -13,8 +13,11 @@ class PrintRecipePipeline(object):
         return item
 
 class MongoPipeline(object):
+    def close_spider(self, spider):
+        spider.client.close()
+
     def process_item(self, item, spider):
-        # write to DB
-        if spider.debug: 
-            print("from Mongo")
+        if spider.debug:
+            print("Writing to MongoDB")
+        spider.mongo.insert_one(dict(item))
         return item

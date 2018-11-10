@@ -10,11 +10,15 @@ DEFAULT_RECIPE_URL = 'https://www.tasteofhome.com/recipes/'
 class RecipeSpiderSpider(scrapy.Spider):
     name = 'spidey_script'
 
-    def __init__(self, db_name="spidey_data", *args, **kwargs):
+    def __init__(self, db_name="spidey_data", debug=False, *args, **kwargs):
         super(RecipeSpiderSpider, self).__init__(*args, **kwargs)
-        client = MongoClient()
-        db = client[db_name]
-        self.mongo = db["recipes"]
+        self.client = MongoClient()
+        self.db = self.client[db_name]
+        self.mongo = self.db["recipes"]
+        if debug is False:
+            self.debug = False
+        else:
+            self.debug = True
 
     def start_requests(self):
         if hasattr(self, 'url'):
