@@ -59,7 +59,8 @@ def get_instructions(html):
 def get_name(html):
     return None
 
-def parse_recipe(raw_html):
+def parse_recipe(url):
+    raw_html = get_webpage(url)
     html = BeautifulSoup(raw_html, 'html.parser')
     urls = get_print_urls(html)
     if (len(urls) > 0):
@@ -75,4 +76,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Downloading webpage at '" + url)
-    parse_recipe(get_webpage(url))
+    parse_recipe(url)
