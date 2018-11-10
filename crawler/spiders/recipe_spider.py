@@ -23,7 +23,6 @@ class RecipeSpiderSpider(scrapy.Spider):
             if (url):
                 url = urllib.parse.urljoin(response.url, url)
                 if (url not in urls):
-                    print("Parsing URL " + url)
                     pprinty(parse_recipe(recipe_url))
                     urls.append(url)
-        
+
