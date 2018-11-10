@@ -7,7 +7,7 @@ from scrape_recipe import pprinty, parse_recipe
 
 
 class RecipeSpiderSpider(scrapy.Spider):
-    name = 'recipe_spider'
+    name = 'spidey_script'
     start_urls = ['https://www.tasteofhome.com/recipes/']
     #start_urls = ['https://www.maangchi.com/recipes']
     client = MongoClient()
