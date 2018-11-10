@@ -24,9 +24,13 @@ def is_good_response(resp):
             and content_type is not None 
             and content_type.find('html') > -1)
 
-def get_print_button_url(html):
-    possible_buttons = [a for a in html.select('a')]
-    return possible_buttons
+def get_print_urls(html):
+    possible_urls = []
+    for a in html.select('a'):
+        for string in a.stripped_strings:
+            if 'print' in string.lower():
+                possible_urls.append(a.get('href'))
+    return possible_urls
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape some recipes')
@@ -38,4 +42,6 @@ if __name__ == "__main__":
     print("Extracting HTML")
     html = BeautifulSoup(raw_html, 'html.parser')
     
+    for url in get_print_urls(html):
+        print(get_webpage(url))
 
