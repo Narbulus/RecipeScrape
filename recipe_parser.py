@@ -120,8 +120,11 @@ def parse_recipe(url, debug=False):
             raw_html_print = get_webpage(urls[0])
             html = BeautifulSoup(raw_html_print, 'html.parser')
         name = get_name(url, html)
+        print(name)
         instructions = get_instructions(html)
+        print(instructions)
         ingredients = get_ingredients(html)
+        print(ingredients)
         if not name or not instructions or not ingredients:
             return None
         return {'name': name.string, 'instructions': instructions, 'ingredients': ingredients}

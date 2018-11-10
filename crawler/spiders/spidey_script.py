@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+import itertools
 import scrapy
 import urllib
+import re
 from pymongo import MongoClient
 from bs4 import BeautifulSoup 
 from recipe_parser import parse_recipe
+from scrapy_splash import SplashRequest
 
 DEFAULT_RECIPE_URL = 'https://www.tasteofhome.com/recipes/'
 
@@ -17,21 +20,44 @@ class RecipeSpiderSpider(scrapy.Spider):
         self.mongo = db["recipes"]
 
     def start_requests(self):
+        url = DEFAULT_RECIPE_URL
         if hasattr(self, 'url'):
-            yield scrapy.Request(self.url)
-        yield scrapy.Request(DEFAULT_RECIPE_URL)
+            url = self.url
+        yield SplashRequest(url, self.parse_result, args={'wait': 0.5}, endpoint='render.html')
 
-    def parse(self, response):
+    def parse_result(self, response):
         urls = []
-        html = BeautifulSoup(response.body, 'html.parser')
+        for url in itertools.chain(self.extract_link_urls(response), self.extract_raw_urls(response)):
+            recipe = self.process_recipe_url(url, urls)
+            if (recipe):
+                yield recipe
+    
+    def extract_link_urls(self, response):
+        html = BeautifulSoup(response.text, 'html.parser')
+        # Check for recipes in the DOM first
         for link in html.find_all('a'):
-            url = link['href']
-            if (url):
-                url = urllib.parse.urljoin(response.url, url)
+            url = link.get('href')
+            if (url) :
                 if (self.debug):
-                    print(url)
-                if (url not in urls):
-                    urls.append(url)
-                    recipe = parse_recipe(url, self.debug)
-                    if (recipe):
-                        yield recipe
+                    print("Link URL: " + url)
+                yield url
+
+    def extract_raw_urls(self, response):
+        # Check for raw URLs floating around (like in scripts)
+        regexp = re.compile('\"(?:[-:\/\w.]|(?:%[\da-fA-F]{2}))+(?:\/[-\w]+)*\/?\"')
+        raw_urls = regexp.findall(response.text)
+        for url in raw_urls:
+            if (self.debug):
+                print("Raw URL: " + url)
+            yield url
+                
+    def process_recipe_url(self, url, seen_urls):
+        if (url not in seen_urls and 'recipe' in url):
+            seen_urls.append(url)
+            recipe = parse_recipe(url, self.debug)
+            if (recipe):
+                return recipe
+
+
+
+
