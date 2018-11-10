@@ -16,9 +16,6 @@ def get_webpage(url):
         return None
 
 def is_good_response(resp):
-    """
-    Returns True if the response seems to be HTML, False otherwise.
-    """
     content_type = resp.headers['Content-Type'].lower()
     return (resp.status_code == 200 
             and content_type is not None 
@@ -66,8 +63,9 @@ if __name__ == "__main__":
     urls = get_print_urls(html)
     if (len(urls) > 0):
         print("Printable version found, extracting HTML")
-    
-    raw_html_print = get_webpage(urls[0])
-    html_print = BeautifulSoup(raw_html_print, 'html.parser')
-    print(get_instructions(html_print))
+        raw_html_print = get_webpage(urls[0])
+        html = BeautifulSoup(raw_html_print, 'html.parser')
+    else:
+        print("No printable version found, using webpage")
+    print(get_instructions(html))
 
