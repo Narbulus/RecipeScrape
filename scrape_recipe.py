@@ -36,8 +36,15 @@ def get_section(html, keywords):
     for header in html.find_all('h2'):
         for string in header.stripped_strings:
             if any(x in string.lower() for x in keywords):
-                return header.parent
+                if (is_valid(header.parent)):
+                    return header.parent
     return None
+
+def is_valid(html):
+    for ul in html.find_all('ul'):
+        return True
+    for ul in html.find_all('ol'):
+        return True
 
 def get_ingredients(html):
     return None
@@ -69,5 +76,5 @@ if __name__ == "__main__":
     
     raw_html_print = get_webpage(urls[0])
     html_print = BeautifulSoup(raw_html_print, 'html.parser')
-    print(get_instructions(html_print))
+    get_instructions(html_print)
 
