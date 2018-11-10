@@ -2,6 +2,7 @@
 import scrapy
 import scrape_recipe
 from bs4 import BeautifulSoup 
+from pymongo import MongoClient
 
 
 class RecipeSpiderSpider(scrapy.Spider):
