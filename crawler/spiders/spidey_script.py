@@ -25,8 +25,10 @@ class RecipeSpiderSpider(scrapy.Spider):
                 if (self.debug):
                     print(url)
                 if (url not in urls):
-                    recipe = parse_recipe(url, self.debug)
-                    if (recipe and self.debug):
-                        pprinty(recipe)
                     urls.append(url)
+                    recipe = parse_recipe(url, self.debug)
+                    if (recipe):
+                        if (self.debug):
+                            pprinty(recipe)
+                        yield recipe
 
