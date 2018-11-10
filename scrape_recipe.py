@@ -33,28 +33,33 @@ def get_section(html, keywords):
     for header in html.find_all('h2'):
         for string in header.stripped_strings:
             if any(x in string.lower() for x in keywords):
-                return header.parent
+                if (is_valid(header.parent)):
+                    return header.parent
     return None
+
+def is_valid(html):
+    for ul in html.find_all('ul'):
+        return True
+    for ul in html.find_all('ol'):
+        return True
 
 def get_ingredients(html):
     return None
 
 def get_instructions(html):
     section = get_section(html, ['ingredients', 'steps'])
+    instructions=[]
     i = 1
     for ul in section.find_all('ul'):
         for li in ul.find_all('li'):
-            print("step " + str(i) + " : " + li.string)
+            instructions.append("step " + str(i) + " : " + li.string)
             i += 1
+    return instructions
 
 def get_name(html):
     return None
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Scrape some recipes')
-    parser.add_argument('url', type=str)
-    args = parser.parse_args()
-    
+def main(html):
     print("Downloading webpage at '" + args.url)
     raw_html = get_webpage(args.url)
     print("Extracting HTML from: " + args.url)
@@ -67,5 +72,13 @@ if __name__ == "__main__":
         html = BeautifulSoup(raw_html_print, 'html.parser')
     else:
         print("No printable version found, using webpage")
-    print(get_instructions(html))
+    instructions = get_instructions(html)
+    for x in instructions:
+        print(x)
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Scrape some recipes')
+    parser.add_argument('url', type=str)
+    args = parser.parse_args()
+    
+    main(args.url)
