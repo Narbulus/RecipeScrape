@@ -52,6 +52,9 @@ def get_section(types, html, keywords, validifiers):
 
 ### gets the name of the recipe
 def get_name(url, html):
+    name_segments = get_name_segments(url)
+    if (name_segments == None):
+        return None
     return get_section_header(html, get_name_segments(url), None)
 
 ### gets all keywords of the recipe title
@@ -103,6 +106,8 @@ def parse_recipe(url):
             raw_html_print = get_webpage(urls[0])
             html = BeautifulSoup(raw_html_print, 'html.parser')
         name = get_name(url, html)
+        if (name == None):
+            return None
         print("Recipe Name: " + name.string)
         instructions = get_instructions(html)
         print("Instructions")
@@ -113,6 +118,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape some recipes')
     parser.add_argument('url', type=str)
     args = parser.parse_args()
-
-    print("Downloading webpage at '" + args.url)
     parse_recipe(args.url)
