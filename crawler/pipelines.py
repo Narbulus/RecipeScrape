@@ -11,3 +11,10 @@ class PrintRecipePipeline(object):
         if spider.debug:
             pprinty(item)
         return item
+
+class MongoPipeline(object):
+    def process_item(self, item, spider):
+        # write to DB
+        if spider.debug: 
+            print("from Mongo")
+        return item
