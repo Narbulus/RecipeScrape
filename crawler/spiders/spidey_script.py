@@ -3,16 +3,17 @@ import scrapy
 import urllib
 from bs4 import BeautifulSoup 
 from pymongo import MongoClient
-from scrape_recipe import pprinty, parse_recipe
+from recipe_parser import pprinty, parse_recipe
 
 
 class RecipeSpiderSpider(scrapy.Spider):
     name = 'spidey_script'
-    start_urls = ['https://www.tasteofhome.com/recipes/']
-    #start_urls = ['https://www.maangchi.com/recipes']
     client = MongoClient()
     db = client.recipe_db_test
     recipe_collection = db.recipes
+
+    def start_requests(self):
+        yield scrapy.Request(self.url)
 
     def parse(self, response):
         urls = []
@@ -21,9 +22,11 @@ class RecipeSpiderSpider(scrapy.Spider):
             url = link['href']
             if (url):
                 url = urllib.parse.urljoin(response.url, url)
+                if (self.debug):
+                    print(url)
                 if (url not in urls):
-                    recipe = parse_recipe(url)
-                    if (recipe):
+                    recipe = parse_recipe(url, self.debug)
+                    if (recipe and self.debug):
                         pprinty(recipe)
                     urls.append(url)
 
