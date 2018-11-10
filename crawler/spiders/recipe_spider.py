@@ -20,5 +20,5 @@ class RecipeSpiderSpider(scrapy.Spider):
                 recipe_url = recipe_link['href']
                 if (recipe_url):
                     print("Parsing URL " + recipe_url)
-                    scrape_recipe.parse_recipe(recipe_url)
+                    scrape_recipe.pprinty(scrape_recipe.parse_recipe(recipe_url))
         
