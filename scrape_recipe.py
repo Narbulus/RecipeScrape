@@ -29,35 +29,40 @@ def get_print_urls(html):
                 possible_urls.append(a.get('href'))
     return possible_urls
 
-def get_section(html, keywords):
+def get_section(html, keywords, validifiers):
     for header in html.find_all('h2'):
         for string in header.stripped_strings:
             if any(x in string.lower() for x in keywords):
-                if (is_valid(header.parent)):
+                if (contains(header.parent, validifiers)):
                     return header.parent
     return None
 
-def is_valid(html):
-    for ul in html.find_all('ul'):
-        return True
-    for ul in html.find_all('ol'):
-        return True
+def get_name(html):
+    return None
 
 def get_ingredients(html):
     return None
 
 def get_instructions(html):
-    section = get_section(html, ['ingredients', 'steps'])
-    instructions=[]
-    i = 1
-    for ul in section.find_all('ul'):
-        for li in ul.find_all('li'):
-            instructions.append("step " + str(i) + " : " + li.string)
-            i += 1
-    return instructions
+    tags = ['ul', 'ol']
+    section = get_section(html, ['ingredients', 'steps'], tags)
+    return get_list_with_sub(section, tags, 'li')
 
-def get_name(html):
-    return None
+def contains(html, tags):
+    for tag in tags:
+        for _ in html.find_all(tag):
+            return True
+    return False
+
+def get_list_with_sub(section, tags, sub_tag):
+    _list=[]
+    i=1
+    for tag in tags:
+        for t in section.find_all(tag):
+            for elt in t.find_all(sub_tag):
+                _list.append("step " + str(i) + " : " + elt.string)
+                i += 1
+            return _list
 
 def parse_recipe(url):
     raw_html = get_webpage(url)
@@ -77,3 +82,4 @@ if __name__ == "__main__":
 
     print("Downloading webpage at '" + url)
     parse_recipe(url)
+
