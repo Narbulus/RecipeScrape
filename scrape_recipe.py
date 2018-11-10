@@ -135,5 +135,6 @@ if __name__ == "__main__":
     parser.add_argument('url', type=str)
     args = parser.parse_args()
     recipe = parse_recipe(args.url)
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(recipe)
+    if recipe:
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(recipe)

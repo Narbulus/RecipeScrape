@@ -8,21 +8,22 @@ from scrape_recipe import pprinty, parse_recipe
 
 class RecipeSpiderSpider(scrapy.Spider):
     name = 'recipe_spider'
-    #start_urls = ['https://www.tasteofhome.com/recipes/']
-    start_urls = ['https://www.maangchi.com/recipes']
+    start_urls = ['https://www.tasteofhome.com/recipes/']
+    #start_urls = ['https://www.maangchi.com/recipes']
     client = MongoClient()
     db = client.recipe_db_test
     recipe_collection = db.recipes
 
     def parse(self, response):
         urls = []
-        print(response.url)
         html = BeautifulSoup(response.body, 'html.parser')
         for link in html.find_all('a'):
             url = link['href']
             if (url):
                 url = urllib.parse.urljoin(response.url, url)
                 if (url not in urls):
-                    pprinty(parse_recipe(recipe_url))
+                    recipe = parse_recipe(url)
+                    if (recipe):
+                        pprinty(recipe)
                     urls.append(url)
 
