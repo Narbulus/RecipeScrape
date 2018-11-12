@@ -1,5 +1,6 @@
 import argparse
 import pprint
+from parsers import BaseParser, TitledListSectionParser, HEADING_TAGS
 from requests import get
 from requests.exceptions import RequestException
 from contextlib import closing
@@ -146,13 +147,26 @@ def parse_recipe(url, debug):
         instructions = get_instructions(html)
         ingredients = get_ingredients(html)
         image_url = get_image_url(url, html)
-        if not name or not instructions or not ingredients:
-            return None
+        # if not name or not instructions or not ingredients:
+            # return None
         return  {
             'name': name.string, 
             'instructions': instructions, 
             'ingredients': ingredients, 
             'image_url': image_url
+        }
+
+def parse_recipe_new(url):
+    raw_html = get_webpage(url)
+    if raw_html:
+        html = BeautifulSoup(raw_html, 'html.parser')
+        name = BaseParser(HEADING_TAGS, get_name_segments(url)).parse(html)
+        instructions = TitledListSectionParser(['directions', 'instructions', 'steps']).parse(html)
+        ingredients = TitledListSectionParser(['ingredients', 'materials']).parse(html)
+        return {
+            'name': name, 
+            'instructions': instructions, 
+            'ingredients': ingredients, 
         }
 
 def pprinty(recipe):
@@ -162,8 +176,12 @@ def pprinty(recipe):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape some recipes')
     parser.add_argument('url', type=str)
+    parser.add_argument('--use-new', action='store_true')
     args = parser.parse_args()
-    recipe = parse_recipe(args.url)
+    if (args.use_new):
+        recipe = parse_recipe_new(args.url)
+    else:
+        recipe = parse_recipe(args.url, True)
     if recipe:
         pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(recipe)
+        # pp.pprint(recipe)
